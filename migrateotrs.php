@@ -48,7 +48,7 @@ if (!db_field_exists('article', 'freshdesk_updated')) {
 
 // First process all base tickets till they are exhausted
 $i = 0;
-$query = 'SELECT id, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER by id LIMIT ' . $settings['chunksize'];
+$query = 'SELECT id, tn, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER by id LIMIT ' . $settings['chunksize'];
 $result = db_query($query);
 if ($result->rowCount() != 0) {
   // Process base tickets.
@@ -69,18 +69,63 @@ if ($result->rowCount() != 0) {
     if (empty($sender) && !empty($record['a_from'])) {
       $sender = $record['a_from'];
     }
+    // We are going to set all tickets to closed
+    $status = 5;
+    // We are going to set all ticket priorities to the lowerst value
+    $priority = 1;
+    // Build the ticket description which has the contents of the ticket
+    $description = 'OTRS Ticket Number: ' . $item->tn . "\n";
+    $description .= 'Other Information: ' . "\n";
+    $description .= 'Reply To: ' . $record['a_reply_to'] . "\n";
+    $description .= 'From: ' . $record['a_from'] . "\n";
+    $description .= $record['a_body'];
 
+    $data = array(
+      'helpdesk_ticket' => array(
+        'description' => $description,
+        'subject' => $item->title,
+        'email' => $sender,
+        'priority' => $priority,
+        'status' => $status,
+      ),
+    );
+
+    $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
+
+    $header[] = 'Content-type: application/json';
+    try {
+      $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets.json');
+      curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
+      curl_setopt($connection, CURLOPT_HEADER, false);
+      curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
+      curl_setopt($connection, CURLOPT_POST, true);
+      curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
+
+      $response = curl_exec($connection);
+      if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
+        die('You have hit your hourly API call limit');
+      }
+      $respondedecoded = json_decode($response, TRUE);
+    }
+    catch (Exception $e) {
+      die('Error Thrown ' . $e);
+    }
+    
+    $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
     // Set table field to indicate completed ticket.
-    /*
-      db_update('ticket')
+    db_update('ticket')
       ->fields(array(
-      'freshdesk_updated' => 1,
+        'freshdesk_updated' => 1,
+        'freshdesk_id' => $ticketid,
       ))
       ->condition('id', $item->id)
-      ->execute(); */
+      ->execute();
   }
 }
 elseif ($result->rowCount() == 0) {
   // Process ticket replies and notes.
 }
+
+curl_close($connection);
 ?>
