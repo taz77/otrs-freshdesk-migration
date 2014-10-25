@@ -10,8 +10,6 @@ require_once(dirname(__FILE__) . '/includes/config.php');
 require_once(dirname(__FILE__) . '/includes/database/database.inc');
 require_once dirname(__FILE__) . '/includes/database/' . $databases['default']['default']['driver'] . '/database.inc';
 
-
-
 // Create an Freshdesk updated or not field for cron processing.
 $spec1 = array(
   'description' => 'Processed ticket to Freshdesk.',
@@ -41,3 +39,4 @@ if (!db_field_exists('article', 'freshdesk_updated')) {
 }
 
 
+?>
