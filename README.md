@@ -1,4 +1,4 @@
-OTRS to Freshdesk Converstion Tool
+## OTRS to Freshdesk Converstion Tool ##
 
 Purpose: Convert OTRS tickets to Freshdesk tickets
 
