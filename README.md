@@ -43,7 +43,9 @@ limit. I cannot provide instruction on that because it depends on the operating
 system you are using.
 
 ##How Long Will This Take##
+Like said before, this could take a very long time to run.  Want to know how long?
 Setup the config file then run this:
+
 php howlongwillthistake.php
 
 ##Credits##
