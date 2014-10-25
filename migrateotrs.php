@@ -38,17 +38,41 @@ if (!db_field_exists('ticket', 'freshdesk_id')) {
   db_add_field('ticket', 'freshdesk_id', $spec2);
 }
 // Add fields to the tables needed.
+if (!db_field_exists('ticket', 'freshdesk_updated_article')) {
+  db_add_field('ticket', 'freshdesk_updated_article', $spec1);
+}
+// Add fields to the tables needed.
 if (!db_field_exists('article', 'freshdesk_updated')) {
   db_add_field('article', 'freshdesk_updated', $spec1);
 }
 
 // First process all base tickets till they are exhausted
+$i = 0;
 $query = 'SELECT id, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER by id LIMIT ' . $settings['chunksize'];
 $result = db_query($query);
 if ($result->rowCount() != 0) {
+  // Process base tickets.
   foreach ($result as $item){
-    $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' ORDER BY id');
+    // We pull the first article for the ticket in order to get email addresses.
+    $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' ORDER BY id LIMIT 1');
+    
+    
+    
+    
+    
+    // Set table field to indicate completed ticket.
+    db_update('ticket')
+    ->fields(array(
+      'freshdesk_updated' => 1,
+    ))
+    ->condition('id', $item->id)  
+    ->execute();  
+    
   }
 }
+elseif ($result->rowCount() == 0){
+  // Process ticket replies and notes.
+}
+  
 
 ?>
