@@ -48,5 +48,15 @@ Setup the config file then run this:
 
 php howlongwillthistake.php
 
+##Support##
+Migrating data is always a moving target and you can never assume what someones
+data may look like.  This scrip may or may not work for you, it is provided as-is with no
+support.  Data migration can take a serious amount of time to troubleshoot because of
+an infinite amount of variables.  If you want professional help, contact
+info@fastglass.net
+
+##Authors##
+Written by Brady Owens, Chief Technical Officer, Fastglass LLC (http://www.fastglass.net)
+
 ##Credits##
 Database abstraction classes come from Drupal (https://www.drupal.org)
