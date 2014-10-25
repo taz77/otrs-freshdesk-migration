@@ -7,6 +7,7 @@ Convert OTRS tickets to Freshdesk tickets
 * OTRS Database (copy)
 * Freshdesk Account
 * MySQL or Postgre (does not support MSSQL)
+* PHP with PDO support
 
 ### WARNING: ###
 This script modifies the OTRS database! Do not run this against your 
