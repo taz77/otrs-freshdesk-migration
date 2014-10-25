@@ -111,7 +111,7 @@ if ($result->rowCount() != 0) {
     catch (Exception $e) {
       die('Error Thrown ' . $e);
     }
-    
+
     $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
     // Set table field to indicate completed ticket.
     db_update('ticket')
@@ -121,10 +121,96 @@ if ($result->rowCount() != 0) {
       ))
       ->condition('id', $item->id)
       ->execute();
+    // Must also mark the first article as done so we don't make dupes later.
+    db_update('article')
+      ->fields(array(
+        'freshdesk_updated' => 1,
+      ))
+      ->condition('id', $record['id'])
+      ->execute();
   }
 }
 elseif ($result->rowCount() == 0) {
   // Process ticket replies and notes.
+  $query = 'SELECT id, freshdesk_id FROM {ticket} WHERE freshdesk_updated_article = 0 AND freshdesk_id !=0 ORDER by id';
+  $ticketresult = db_query($query);
+  if ($ticketresult->rowCount() == 0) {
+    die('Processing is over');
+  }
+
+  foreach ($ticketresult as $item) {
+    if ($i >= $settings['chunksize']) {
+      break;
+    }
+    $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' AND freshdesk_updated = 0  ORDER BY id');
+    $articlecount = $articleresult->rowCount();
+    // DEBUGING echo 'Number of articles ' . $articlecount . PHP_EOL;
+    if ($articlecount == 0) {
+      // No more articles mark the ticket as done.
+      db_update('ticket')
+        ->fields(array(
+          'freshdesk_updated_article' => 1,
+        ))
+        ->condition('id', $item->id)
+        ->execute();
+    }
+    else {
+      $j = 1;
+      foreach ($articleresult as $notes) {
+        // DEBUGING echo 'API ITERATION i: ' . $i . ' of ' . $settings['chunksize'] . 'total' . PHP_EOL;
+        // DEBUGING echo 'ARTICLE ITERATION NUMBER ' . $j . PHP_EOL;
+        if ($i >= $settings['chunksize']) {
+          break;
+        }
+        $data = array(
+          'helpdesk_note' => array(
+            'body' => $notes->a_body,
+            'private' => FALSE,
+          ),
+        );
+
+        $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
+
+        $header[] = 'Content-type: application/json';
+        try {
+          $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets/' . $item->freshdesk_id . '/conversations/note.json');
+          curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
+          curl_setopt($connection, CURLOPT_HEADER, false);
+          curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
+          curl_setopt($connection, CURLOPT_POST, true);
+          curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
+
+          $response = curl_exec($connection);
+          if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
+            die('You have hit your hourly API call limit');
+          }
+          $respondedecoded = json_decode($response, TRUE);
+        }
+        catch (Exception $e) {
+          die('Error Thrown ' . $e);
+        }
+        // Set table field to indicate completed ticket.
+        db_update('article')
+          ->fields(array(
+            'freshdesk_updated' => 1,
+          ))
+          ->condition('id', $notes->id)
+          ->execute();
+        $i++;
+        if ($j > $articlecount) {
+          // No more articles mark the ticket as done.
+          db_update('ticket')
+            ->fields(array(
+              'freshdesk_updated_article' => 1,
+            ))
+            ->condition('id', $item->id)
+            ->execute();
+        }
+        $j++;
+      }
+    }
+  }
 }
 
 curl_close($connection);
