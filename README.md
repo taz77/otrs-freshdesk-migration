@@ -33,3 +33,12 @@ could very well take days to complete due to the API restriction.
 ##Usage:##
 
 1. Edit configuration ./includes/config.php
+2. Run script: php migrateotrs.php
+
+##Repeating process##
+More than likely you will have to run this process many times due to the API
+limit. I cannot provide instruction on that because it depends on the operating
+system you are using.
+
+##Credits##
+Database abstraction classes come from Drupal (https://www.drupal.org)
