@@ -72,7 +72,14 @@ $databases = array(
  * fdeskapikey is your API key.  See here on how to obtain:
  * http://freshdesk.com/api#authentication
  * Example
- * 
+ * $settings = array(
+ *  'chunksize' => 5,
+ *  'csemailaddr' => 'support@example.com',
+ *  'nulltitle' => 'No Title',
+ *  'nullsender' => 'noreply@example.com',
+ *  'fdeskurl' => 'https://example.freshdesk.com',
+ *  'fdeskapikey' => 'asdfas897sa9d8798asd',
+ * );
  */
 $settings = array(
   'chunksize' => 1000,
