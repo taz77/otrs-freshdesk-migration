@@ -8,6 +8,7 @@ Convert OTRS tickets to Freshdesk tickets
 * Freshdesk Account
 * MySQL or Postgre (does not support MSSQL)
 * PHP with PDO support
+* PHP Command Line Interface (CLI)
 
 ### WARNING: ###
 This script modifies the OTRS database! Do not run this against your 
@@ -40,6 +41,10 @@ could very well take days to complete due to the API restriction.
 More than likely you will have to run this process many times due to the API
 limit. I cannot provide instruction on that because it depends on the operating
 system you are using.
+
+##How Long Will This Take##
+Setup the config file then run this:
+php howlongwillthistake.php
 
 ##Credits##
 Database abstraction classes come from Drupal (https://www.drupal.org)
