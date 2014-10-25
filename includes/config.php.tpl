@@ -49,7 +49,20 @@ $databases = array(
   ),
 );
 
-/** Process settings
+/**
+ * Process settings.
+ * 
+ * If you have a customer support email address that was used in HTML forms
+ * that sent emails to OTRS.  Supply that email address in csemailaddr so that
+ * it does not get used when the tickets are created and we use a reply-to
+ * field instead.
+ * 
+ * nulltitle should be set to whatever you want the subject of the ticket to be
+ * if there is no subject
+ * 
+ * nullsender should be set to whatever you want the email address to be for a 
+ * ticket that may not have an email address
+ * 
  * Example
  * 
  */
