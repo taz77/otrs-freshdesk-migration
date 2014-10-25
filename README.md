@@ -32,7 +32,8 @@ could very well take days to complete due to the API restriction.
 
 ##Usage:##
 
-1. Edit configuration ./includes/config.php
+1. Copy ./include/config.php.tpl to ./include/config.php
+2. Edit values in newly created config.php (refer to in code documentation).
 2. Run script: php migrateotrs.php
 
 ##Repeating process##
