@@ -57,17 +57,30 @@ $databases = array(
  * it does not get used when the tickets are created and we use a reply-to
  * field instead.
  * 
+ * chunksize is the maximum number of calls you want to perform per run of the
+ * script. Freshdesk is limited to 1000 calls per hour.
+ * 
  * nulltitle should be set to whatever you want the subject of the ticket to be
  * if there is no subject
  * 
  * nullsender should be set to whatever you want the email address to be for a 
  * ticket that may not have an email address
  * 
+ * fdeskurl is the URL of your Freshdesk account with protocol.  
+ * Recommend using SSL.
+ * 
+ * fdeskapikey is your API key.  See here on how to obtain:
+ * http://freshdesk.com/api#authentication
  * Example
  * 
  */
 $settings = array(
   'chunksize' => 1000,
+  'csemailaddr' => '',
+  'nulltitle' => '',
+  'nullsender' => '',
+  'fdeskurl' => '',
+  'fdeskapikey' => '',
 );
 
 
