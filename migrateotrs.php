@@ -11,6 +11,7 @@ require_once(dirname(__FILE__) . '/includes/database/database.inc');
 require_once dirname(__FILE__) . '/includes/database/' . $databases['default']['default']['driver'] . '/database.inc';
 
 
+
 // Create an Freshdesk updated or not field for cron processing.
 $spec1 = array(
   'description' => 'Processed ticket to Freshdesk.',
@@ -27,8 +28,16 @@ $spec2 = array(
 );
 
 // Add fields to the tables needed.
-db_add_field('tickets', 'freshdesk_updated', $spec1);
-db_add_field('tickets', 'freshdesk_id', $spec2);
-db_add_field('article', 'freshdesk_updated', $spec1);
+if (!db_field_exists('tickets', 'freshdesk_updated')) {
+  db_add_field('tickets', 'freshdesk_updated', $spec1);
+}
+// Add fields to the tables needed.
+if (!db_field_exists('tickets', 'freshdesk_id')) {
+  db_add_field('tickets', 'freshdesk_id', $spec2);
+}
+// Add fields to the tables needed.
+if (!db_field_exists('article', 'freshdesk_updated')) {
+  db_add_field('article', 'freshdesk_updated', $spec1);
+}
 
 
