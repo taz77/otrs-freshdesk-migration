@@ -13,7 +13,9 @@ require_once(dirname(__FILE__) . '/includes/unicode.inc');
 // Load the database include file and also load the driver file set in the config
 require_once(dirname(__FILE__) . '/includes/database/database.inc');
 require_once dirname(__FILE__) . '/includes/database/' . $databases['default']['default']['driver'] . '/database.inc';
-
+// Create an empty message variable.
+$message = '';
+$message .= PHP_EOL;
 // Create an Freshdesk updated or not field for cron processing.
 $spec1 = array(
   'description' => 'Processed ticket to Freshdesk.',
@@ -129,17 +131,20 @@ if ($result->rowCount() != 0) {
       ->condition('id', $record['id'])
       ->execute();
   }
+  $message .= 'Processed ' . $result->rowCount() . ' base tickets.' . PHP_EOL;
 }
 elseif ($result->rowCount() == 0) {
   // Process ticket replies and notes.
   $query = 'SELECT id, freshdesk_id FROM {ticket} WHERE freshdesk_updated_article = 0 AND freshdesk_id !=0 ORDER by id';
   $ticketresult = db_query($query);
   if ($ticketresult->rowCount() == 0) {
-    die('Processing is over');
+    die('Processing is over out of base tickets to process' . PHP_EOL);
   }
 
   foreach ($ticketresult as $item) {
     if ($i >= $settings['chunksize']) {
+      $message .= 'Process limit hit. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
+      $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
       break;
     }
     $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' AND freshdesk_updated = 0  ORDER BY id');
@@ -160,6 +165,8 @@ elseif ($result->rowCount() == 0) {
         // DEBUGING echo 'API ITERATION i: ' . $i . ' of ' . $settings['chunksize'] . 'total' . PHP_EOL;
         // DEBUGING echo 'ARTICLE ITERATION NUMBER ' . $j . PHP_EOL;
         if ($i >= $settings['chunksize']) {
+          $message .= 'Process limit hit. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
+          $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
           break;
         }
         $data = array(
@@ -198,6 +205,7 @@ elseif ($result->rowCount() == 0) {
           ->condition('id', $notes->id)
           ->execute();
         $i++;
+        $j++;
         if ($j > $articlecount) {
           // No more articles mark the ticket as done.
           db_update('ticket')
@@ -207,11 +215,14 @@ elseif ($result->rowCount() == 0) {
             ->condition('id', $item->id)
             ->execute();
         }
-        $j++;
       }
     }
   }
 }
-
+if ($i <= $settings['chunksize']) {
+  $message .= 'Process limit was not hit.  Ran out of data to process. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
+  $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
+}
 curl_close($connection);
+print_r($message);
 ?>
