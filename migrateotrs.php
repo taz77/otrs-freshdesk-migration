@@ -106,30 +106,34 @@ if ($result->rowCount() != 0) {
 
       $response = curl_exec($connection);
       if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
-        die('You have hit your hourly API call limit');
+        die(PHP_EOL . 'You have hit your hourly API call limit' . PHP_EOL);
       }
       $respondedecoded = json_decode($response, TRUE);
     }
     catch (Exception $e) {
       die('Error Thrown ' . $e);
     }
-
-    $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
-    // Set table field to indicate completed ticket.
-    db_update('ticket')
-      ->fields(array(
-        'freshdesk_updated' => 1,
-        'freshdesk_id' => $ticketid,
-      ))
-      ->condition('id', $item->id)
-      ->execute();
-    // Must also mark the first article as done so we don't make dupes later.
-    db_update('article')
-      ->fields(array(
-        'freshdesk_updated' => 1,
-      ))
-      ->condition('id', $record['id'])
-      ->execute();
+    // We only update if curl was successful.
+    if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
+      $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
+      // Set table field to indicate completed ticket.
+      db_update('ticket')
+        ->fields(array(
+          'freshdesk_updated' => 1,
+          'freshdesk_id' => $ticketid,
+        ))
+        ->condition('id', $item->id)
+        ->execute();
+      // Must also mark the first article as done so we don't make dupes later.
+      db_update('article')
+        ->fields(array(
+          'freshdesk_updated' => 1,
+        ))
+        ->condition('id', $record['id'])
+        ->execute();
+    }
+    unset($sender);
+    unset($description);
   }
   $message .= 'Processed ' . $result->rowCount() . ' base tickets.' . PHP_EOL;
 }
@@ -190,20 +194,23 @@ elseif ($result->rowCount() == 0) {
 
           $response = curl_exec($connection);
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
-            die('You have hit your hourly API call limit');
+            die(PHP_EOL . 'You have hit your hourly API call limit' . PHP_EOL);
           }
           $respondedecoded = json_decode($response, TRUE);
         }
         catch (Exception $e) {
           die('Error Thrown ' . $e);
         }
-        // Set table field to indicate completed ticket.
-        db_update('article')
-          ->fields(array(
-            'freshdesk_updated' => 1,
-          ))
-          ->condition('id', $notes->id)
-          ->execute();
+        // We only update if curl was successful.
+        if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
+          // Set table field to indicate completed ticket.
+          db_update('article')
+            ->fields(array(
+              'freshdesk_updated' => 1,
+            ))
+            ->condition('id', $notes->id)
+            ->execute();
+        }
         $i++;
         $j++;
         if ($j > $articlecount) {
@@ -219,7 +226,7 @@ elseif ($result->rowCount() == 0) {
     }
   }
 }
-if ($i <= $settings['chunksize']) {
+if ($i < $settings['chunksize']) {
   $message .= 'Process limit was not hit.  Ran out of data to process. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
   $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
 }
