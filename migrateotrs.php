@@ -54,6 +54,13 @@ $query = 'SELECT id, tn, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER b
 $result = db_query($query);
 if ($result->rowCount() != 0) {
   // Process base tickets.
+  $header[] = 'Content-type: application/json';
+  $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets.json');
+  curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
+  curl_setopt($connection, CURLOPT_HEADER, false);
+  curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
+  curl_setopt($connection, CURLOPT_POST, true);
   foreach ($result as $item) {
     // We pull the first article for the ticket in order to get email addresses.
     $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' ORDER BY id LIMIT 1');
@@ -93,17 +100,8 @@ if ($result->rowCount() != 0) {
     );
 
     $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
-
-    $header[] = 'Content-type: application/json';
     try {
-      $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets.json');
-      curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
-      curl_setopt($connection, CURLOPT_HEADER, false);
-      curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
-      curl_setopt($connection, CURLOPT_POST, true);
       curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
-
       $response = curl_exec($connection);
       if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
         die(PHP_EOL . 'You have hit your hourly API call limit' . PHP_EOL);
@@ -116,6 +114,7 @@ if ($result->rowCount() != 0) {
     // We only update if curl was successful.
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
       $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
+      print_r(PHP_EOL . 'Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender . PHP_EOL);
       // Set table field to indicate completed ticket.
       db_update('ticket')
         ->fields(array(
