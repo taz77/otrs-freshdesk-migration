@@ -37,6 +37,8 @@ could very well take days to complete due to the API restriction.
 2. Edit values in newly created config.php (refer to in code documentation).
 2. Run script: php migrateotrs.php
 
+**NOTE**: You probably should turn off email notifications to your customers in Freshbooks to make sure no emails are sent.
+
 ##Repeating process##
 More than likely you will have to run this process many times due to the API
 limit. I cannot provide instruction on that because it depends on the operating
