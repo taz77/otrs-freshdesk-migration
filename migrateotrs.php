@@ -50,6 +50,7 @@ if (!db_field_exists('article', 'freshdesk_updated')) {
 
 // First process all base tickets till they are exhausted
 $i = 0;
+$z = 1;
 $query = 'SELECT id, tn, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER by id LIMIT ' . $settings['chunksize'];
 $result = db_query($query);
 if ($result->rowCount() != 0) {
@@ -104,7 +105,7 @@ if ($result->rowCount() != 0) {
       curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
       $response = curl_exec($connection);
       if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
-        die(PHP_EOL . 'You have hit your hourly API call limit' . PHP_EOL);
+        die(PHP_EOL . 'You have hit your hourly API call limit. You processed a total of ' . $z . ' base tickets. Run one hour from now.' . PHP_EOL);
       }
       $respondedecoded = json_decode($response, TRUE);
     }
@@ -113,6 +114,7 @@ if ($result->rowCount() != 0) {
     }
     // We only update if curl was successful.
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
+      $z++;
       $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
       print_r(PHP_EOL . 'Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender . PHP_EOL);
       // Set table field to indicate completed ticket.
@@ -193,7 +195,7 @@ elseif ($result->rowCount() == 0) {
 
           $response = curl_exec($connection);
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
-            die(PHP_EOL . 'You have hit your hourly API call limit' . PHP_EOL);
+            die(PHP_EOL . 'You have hit your hourly API call limit. You processed ' . $i . ' articles. Run one hour from now.' . PHP_EOL);
           }
           $respondedecoded = json_decode($response, TRUE);
         }
