@@ -55,7 +55,7 @@ The process this script takes is not perfect.  There were assumptions made on a 
 that may not be true for your scenario. Use at your own risk!
 
 Migrating data is always a moving target and you can never assume what someones
-data may look like.  This scrip may or may not work for you, it is provided as-is with no
+data may look like.  This script may or may not work for you, it is provided as-is with no
 support.  Data migration can take a serious amount of time to troubleshoot because of
 an infinite amount of variables.  If you want professional help, contact
 info@fastglass.net
