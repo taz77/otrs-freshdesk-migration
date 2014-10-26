@@ -50,7 +50,7 @@ if (!db_field_exists('article', 'freshdesk_updated')) {
 
 // First process all base tickets till they are exhausted
 $i = 0;
-$z = 1;
+$z = 0;
 $query = 'SELECT id, tn, title FROM {ticket} WHERE freshdesk_updated = 0 ORDER by id LIMIT ' . $settings['chunksize'];
 $result = db_query($query);
 if ($result->rowCount() != 0) {
