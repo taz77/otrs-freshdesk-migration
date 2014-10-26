@@ -226,10 +226,15 @@ elseif ($result->rowCount() == 0) {
     }
   }
 }
-if ($i < $settings['chunksize']) {
+if ($i < $settings['chunksize'] && $result->rowCount() == 0) {
   $message .= 'Process limit was not hit.  Ran out of data to process. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
   $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
 }
+if ($i == 0) {
+  $message .= 'No articles was processed. Process limit hit during base ticket processing. Continue running to process articles.' . PHP_EOL;
+  $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
+}
+
 curl_close($connection);
 print_r($message);
 ?>
