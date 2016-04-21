@@ -17,19 +17,19 @@ require_once dirname(__FILE__) . '/includes/database/' . $databases['default']['
 $message = '';
 $message .= PHP_EOL;
 // Create an Freshdesk updated or not field for cron processing.
-$spec1 = array(
+$spec1 = [
   'description' => 'Processed ticket to Freshdesk.',
   'type' => 'int',
   'size' => 'normal',
   'default' => 0,
-);
+];
 // Create an Freshdesk ticket ID field.
-$spec2 = array(
+$spec2 = [
   'description' => 'Freshdesk ID of ticket.',
   'type' => 'int',
   'size' => 'normal',
   'default' => 0,
-);
+];
 
 // Add fields to the tables needed.
 if (!db_field_exists('ticket', 'freshdesk_updated')) {
@@ -56,12 +56,12 @@ $result = db_query($query);
 if ($result->rowCount() != 0) {
   // Process base tickets.
   $header[] = 'Content-type: application/json';
-  $connection = curl_init('httpd://' . $settings['fdeskurl'] . '/helpdesk/tickets.json');
-  curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+  $connection = curl_init('httpd://' . $settings['fdeskurl'] . '/api/v2/tickets');
+  curl_setopt($connection, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
-  curl_setopt($connection, CURLOPT_HEADER, false);
+  curl_setopt($connection, CURLOPT_HEADER, FALSE);
   curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
-  curl_setopt($connection, CURLOPT_POST, true);
+  curl_setopt($connection, CURLOPT_POST, TRUE);
   foreach ($result as $item) {
     // We pull the first article for the ticket in order to get email addresses.
     $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' ORDER BY id LIMIT 1');
@@ -90,15 +90,13 @@ if ($result->rowCount() != 0) {
     $description .= 'From: ' . $record['a_from'] . "\n";
     $description .= $record['a_body'];
 
-    $data = array(
-      'helpdesk_ticket' => array(
-        'description' => $description,
-        'subject' => $item->title,
-        'email' => $sender,
-        'priority' => $priority,
-        'status' => $status,
-      ),
-    );
+    $data = [
+      'description' => $description,
+      'subject' => $item->title,
+      'email' => $sender,
+      'priority' => $priority,
+      'status' => $status,
+    ];
 
     $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
     try {
@@ -119,17 +117,17 @@ if ($result->rowCount() != 0) {
       print_r(PHP_EOL . 'Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender . PHP_EOL);
       // Set table field to indicate completed ticket.
       db_update('ticket')
-        ->fields(array(
+        ->fields([
           'freshdesk_updated' => 1,
           'freshdesk_id' => $ticketid,
-        ))
+        ])
         ->condition('id', $item->id)
         ->execute();
       // Must also mark the first article as done so we don't make dupes later.
       db_update('article')
-        ->fields(array(
+        ->fields([
           'freshdesk_updated' => 1,
-        ))
+        ])
         ->condition('id', $record['id'])
         ->execute();
     }
@@ -158,9 +156,9 @@ elseif ($result->rowCount() == 0) {
     if ($articlecount == 0) {
       // No more articles mark the ticket as done.
       db_update('ticket')
-        ->fields(array(
+        ->fields([
           'freshdesk_updated_article' => 1,
-        ))
+        ])
         ->condition('id', $item->id)
         ->execute();
     }
@@ -174,23 +172,23 @@ elseif ($result->rowCount() == 0) {
           $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
           break;
         }
-        $data = array(
-          'helpdesk_note' => array(
+        $data = [
+          'helpdesk_note' => [
             'body' => $notes->a_body,
             'private' => FALSE,
-          ),
-        );
+          ],
+        ];
 
         $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
 
         $header[] = 'Content-type: application/json';
         try {
           $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets/' . $item->freshdesk_id . '/conversations/note.json');
-          curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+          curl_setopt($connection, CURLOPT_RETURNTRANSFER, TRUE);
           curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
-          curl_setopt($connection, CURLOPT_HEADER, false);
+          curl_setopt($connection, CURLOPT_HEADER, FALSE);
           curl_setopt($connection, CURLOPT_USERPWD, $settings['fdeskapikey'] . ':X');
-          curl_setopt($connection, CURLOPT_POST, true);
+          curl_setopt($connection, CURLOPT_POST, TRUE);
           curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
 
           $response = curl_exec($connection);
@@ -206,9 +204,9 @@ elseif ($result->rowCount() == 0) {
         if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
           // Set table field to indicate completed ticket.
           db_update('article')
-            ->fields(array(
+            ->fields([
               'freshdesk_updated' => 1,
-            ))
+            ])
             ->condition('id', $notes->id)
             ->execute();
         }
@@ -217,9 +215,9 @@ elseif ($result->rowCount() == 0) {
         if ($j > $articlecount) {
           // No more articles mark the ticket as done.
           db_update('ticket')
-            ->fields(array(
+            ->fields([
               'freshdesk_updated_article' => 1,
-            ))
+            ])
             ->condition('id', $item->id)
             ->execute();
         }
@@ -238,4 +236,3 @@ if ($i == 0) {
 
 curl_close($connection);
 print_r($message);
-?>
