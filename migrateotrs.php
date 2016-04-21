@@ -173,17 +173,15 @@ elseif ($result->rowCount() == 0) {
           break;
         }
         $data = [
-          'helpdesk_note' => [
-            'body' => $notes->a_body,
-            'private' => FALSE,
-          ],
+          'body' => $notes->a_body,
+          'private' => FALSE,
         ];
 
         $json_body = json_encode($data, JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
 
         $header[] = 'Content-type: application/json';
         try {
-          $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets/' . $item->freshdesk_id . '/conversations/note.json');
+          $connection = curl_init('https://' . $settings['fdeskurl'] . '/api/v2/tickets/' . $item->freshdesk_id . '/notes');
           curl_setopt($connection, CURLOPT_RETURNTRANSFER, TRUE);
           curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
           curl_setopt($connection, CURLOPT_HEADER, FALSE);
