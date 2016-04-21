@@ -56,7 +56,7 @@ $result = db_query($query);
 if ($result->rowCount() != 0) {
   // Process base tickets.
   $header[] = 'Content-type: application/json';
-  $connection = curl_init($settings['fdeskurl'] . '/helpdesk/tickets.json');
+  $connection = curl_init('httpd://' . $settings['fdeskurl'] . '/helpdesk/tickets.json');
   curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($connection, CURLOPT_HTTPHEADER, $header);
   curl_setopt($connection, CURLOPT_HEADER, false);
