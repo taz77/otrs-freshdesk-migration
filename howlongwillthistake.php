@@ -17,5 +17,5 @@ require_once dirname(__FILE__) . '/includes/database/' . $databases['default']['
 $result = db_query('SELECT * FROM {article}');
 $article = $result->rowCount();
 
-echo 'Running at a maximum of 1000 calls per hour' . PHP_EOL;
-echo 'It will take ' . ceil($article / 1000)  . ' hours to complete your migration' . PHP_EOL;
+echo 'Running at a maximum of 5000 calls per hour' . PHP_EOL;
+echo 'It will take ' . ceil($article / 5000)  . ' hours to complete your migration' . PHP_EOL;
