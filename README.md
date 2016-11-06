@@ -33,9 +33,9 @@ could very well take days to complete due to the API restriction.
 
 ##Usage:##
 
-1. Copy ./include/config.php.tpl to ./include/config.php
-2. Edit values in newly created config.php (refer to in code documentation).
-2. Run script: php migrateotrs.php
+1. Copy `./include/config.php.tpl` to `./include/config.php`
+2. Edit values in newly created `config.php` (refer to in code documentation).
+2. Run script: `php migrateotrs.php`
 
 **NOTE**: You probably should turn off email notifications to your customers in Freshbooks to make sure no emails are sent.
 
@@ -48,7 +48,7 @@ system you are using.
 Like said before, this could take a very long time to run.  Want to know how long?
 Setup the config file then run this:
 
-php howlongwillthistake.php
+`php howlongwillthistake.php`
 
 ##Support and Disclaimer##
 The process this script takes is not perfect.  There were assumptions made on a single use-case
