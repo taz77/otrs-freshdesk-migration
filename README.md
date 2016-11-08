@@ -14,12 +14,12 @@ Convert OTRS tickets to Freshdesk tickets
 This script modifies the OTRS database! Do not run this against your 
 production/inuse OTRS database! Make a copy of the database to run this against. 
 
-Freshdesk limits the number of API calls to 1000 per hour. To complicate this 
-process, Freshdesk API doesn't accomodate multiple actions in a single call. 
-Example: an OTRS ticket with 5 email responses will take 6 API calls to fully 
-populate in Freshdesk: one call to create the initial ticket and 5 more calls 
-for the responses. So in order to complete a migration this scrip may have to 
-run many times.  In order to do this this script will add fields 
+Freshdesk limits the number of API calls based on your account type ([click here](http://developer.freshdesk.com/api/#ratelimit)). 
+To complicate this process, Freshdesk API doesn't accomodate multiple actions 
+in a single call. Example: an OTRS ticket with 5 email responses will take 6 API
+calls to fully populate in Freshdesk: one call to create the initial ticket and
+5 more calls for the responses. So in order to complete a migration this scrip
+may have to run many times.  In order to do this this script will add fields 
 into the database for tracking of the migration process.
 
 ### How this works ###
