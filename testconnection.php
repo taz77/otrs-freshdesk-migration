@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file Main execute file.
+ * @file Connection test file.
  */
 global $databases;
 // Require the configuration file.
