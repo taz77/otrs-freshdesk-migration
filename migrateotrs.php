@@ -79,6 +79,10 @@ if ($result->rowCount() != 0) {
     if (empty($sender) && !empty($record['a_from'])) {
       $sender = $record['a_from'];
     }
+
+    preg_match('/[\\w\\.\\-+=*_]*@[\\w\\.\\-+=*_]*/', $sender, $regs);
+    $parsedsender = $regs[0];
+
     // We are going to set all tickets to closed
     $status = 5;
     // We are going to set all ticket priorities to the lowerst value
@@ -89,11 +93,10 @@ if ($result->rowCount() != 0) {
     $description .= 'Reply To: ' . $record['a_reply_to'] . "\n";
     $description .= 'From: ' . $record['a_from'] . "\n";
     $description .= $record['a_body'];
-
     $data = [
       'description' => $description,
       'subject' => $item->title,
-      'email' => $sender,
+      'email' => $parsedsender,
       'priority' => $priority,
       'status' => $status,
     ];
@@ -106,6 +109,11 @@ if ($result->rowCount() != 0) {
         die(PHP_EOL . 'You have hit your hourly API call limit. You processed a total of ' . $z . ' base tickets. Run one hour from now.' . PHP_EOL);
       }
       $respondedecoded = json_decode($response, TRUE);
+      if (!empty($respondedecoded['description']) && $respondedecoded['description'] == 'Validation failed') {
+        print_r("\n" . $response . "\n");
+        print_r("\n" . $respondedecoded['description'] . "\n");
+        throw new Exception('A field is invalid');
+      }
     }
     catch (Exception $e) {
       die('Error Thrown ' . $e);
