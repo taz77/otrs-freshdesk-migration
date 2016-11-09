@@ -139,6 +139,15 @@ if ($result->rowCount() != 0) {
         ->condition('id', $record['id'])
         ->execute();
     }
+    // Hault processing if a 400 code was received
+    if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 400) {
+      print_r("\n" . 'Data sent to Freshdesk' . "\n");
+      print_r($data);
+      print_r("\n" . 'Response from Freshdesk' . "\n");
+      print_r($response);
+      throw new Exception('400 Response received from Freshdesk. Check your information');
+      exit;
+    }
     unset($sender);
     unset($description);
   }
