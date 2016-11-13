@@ -88,11 +88,14 @@ if ($result->rowCount() != 0) {
     // We are going to set all ticket priorities to the lowerst value
     $priority = 1;
     // Build the ticket description which has the contents of the ticket
-    $description = 'OTRS Ticket Number: ' . $item->tn . "\n";
-    $description .= 'Other Information: ' . "\n";
-    $description .= 'Reply To: ' . $record['a_reply_to'] . "\n";
-    $description .= 'From: ' . $record['a_from'] . "\n";
+    $description = 'OTRS Ticket Number: ' . $item->tn . '<br/>' . "\n";
+    $description .= 'Other Information: ' . '<br/>' . "\n";
+    $description .= 'Reply To: ' . $record['a_reply_to'] . '<br/>' . "\n";
+    $description .= 'From: ' . $record['a_from'] . '<br/>' . "\n";
     $description .= $record['a_body'];
+    if (empty($item->title)) {
+      $item->title = 'Empty Subject - No title';
+    }
     $data = [
       'description' => $description,
       'subject' => $item->title,
