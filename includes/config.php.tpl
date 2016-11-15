@@ -72,8 +72,8 @@ $databases = array(
  * fdeskapikey is your API key.  See here on how to obtain:
  * http://freshdesk.com/api#authentication
  *
- * logfile is the full path to your log file. This is optional and if specified
- * you must ensure file permissions are correct.
+ * logfilepath is the path to a directory where the log files can be written.
+ * This directory must be writeable by the user executing the script.
  *
  * Example
  * $settings = array(
@@ -83,7 +83,7 @@ $databases = array(
  *  'nullsender' => 'noreply@example.com',
  *  'fdeskurl' => 'example.freshdesk.com',
  *  'fdeskapikey' => 'asdfas897sa9d8798asd',
- *  'logfile' => '/var/log/otrsmigration',
+ *  'logfilepath' => '/var/log/otrsmigration/',
  * );
  */
 $settings = array(
@@ -93,7 +93,7 @@ $settings = array(
   'nullsender' => '',
   'fdeskurl' => '',
   'fdeskapikey' => '',
-  'logfile' => '',
+  'logfilepath' => '',
 );
 
 
