@@ -10,11 +10,23 @@ require 'vendor/autoload.php';
 global $databases;
 // Require the configuration file.
 require_once(dirname(__FILE__) . '/includes/config.php');
-if (!empty($settings['logfile'])){
-  $logger = new Katzgrau\KLogger\Logger($settings['logfile']);
+if (!empty($settings['logfilepath'])){
+  try {
+    $logger = new Katzgrau\KLogger\Logger($settings['logfilepath']);
+  }
+  catch (Exception $e){
+    print_r('Error has occurred: ' . $e . "\n" . 'Exiting');
+    exit;
+  }
 }
 else {
-  $logger = new Katzgrau\KLogger\Logger(__DIR__.'/logs');
+  try {
+    $logger = new Katzgrau\KLogger\Logger(__DIR__ . '/logs');
+  }
+  catch (Exception $e){
+    print_r('Error has occurred: ' . $e . "\n" . 'Exiting');
+    exit;
+  }
 }
 
 // Load the functions file.
