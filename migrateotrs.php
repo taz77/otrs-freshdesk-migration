@@ -3,9 +3,20 @@
 /**
  * @file Main execute file.
  */
+
+// Composer.
+require 'vendor/autoload.php';
+
 global $databases;
 // Require the configuration file.
 require_once(dirname(__FILE__) . '/includes/config.php');
+if (!empty($settings['logfile'])){
+  $logger = new Katzgrau\KLogger\Logger($settings['logfile']);
+}
+else {
+  $logger = new Katzgrau\KLogger\Logger(__DIR__.'/logs');
+}
+
 // Load the functions file.
 require_once(dirname(__FILE__) . '/includes/functions.php');
 // Load text functions needed for DB layer.
