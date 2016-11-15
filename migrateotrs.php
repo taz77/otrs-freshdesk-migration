@@ -121,6 +121,18 @@ if ($result->rowCount() != 0) {
     catch (Exception $e) {
       die('Error Thrown ' . $e);
     }
+
+    // Hault processing if a 400 code was received
+    if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
+      print_r("\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n");
+      print_r("\n" . 'Data sent to Freshdesk' . "\n");
+      print_r($data);
+      print_r("\n" . 'Response from Freshdesk' . "\n");
+      print_r($response);
+      throw new Exception('Error Response received from Freshdesk. Check your information');
+      exit;
+    }
+
     // We only update if curl was successful.
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
       $z++;
@@ -141,15 +153,6 @@ if ($result->rowCount() != 0) {
         ])
         ->condition('id', $record['id'])
         ->execute();
-    }
-    // Hault processing if a 400 code was received
-    if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 400) {
-      print_r("\n" . 'Data sent to Freshdesk' . "\n");
-      print_r($data);
-      print_r("\n" . 'Response from Freshdesk' . "\n");
-      print_r($response);
-      throw new Exception('400 Response received from Freshdesk. Check your information');
-      exit;
     }
     unset($sender);
     unset($description);
