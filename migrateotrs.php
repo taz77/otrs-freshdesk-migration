@@ -10,6 +10,7 @@ require 'vendor/autoload.php';
 global $databases;
 // Require the configuration file.
 require_once(dirname(__FILE__) . '/includes/config.php');
+date_default_timezone_set('UTC');
 if (!empty($settings['logfilepath'])) {
   try {
     $logger = new Katzgrau\KLogger\Logger($settings['logfilepath']);
@@ -132,6 +133,7 @@ if ($result->rowCount() != 0) {
       curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
       $response = curl_exec($connection);
       if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
+        $logger->error('You have hit your hourly API call limit.');
         die(PHP_EOL . 'You have hit your hourly API call limit. You processed a total of ' . $z . ' base tickets. Run one hour from now.' . PHP_EOL);
       }
       $respondedecoded = json_decode($response, TRUE);
@@ -144,6 +146,12 @@ if ($result->rowCount() != 0) {
     }
     catch (Exception $e) {
       die('Error Thrown ' . $e);
+    }
+    if ($debug == TRUE) {
+      $logger->debug('Ticker OTR ID Number: ' . $item->id);
+      $logger->debug('HTTP Response Code from base ticket call: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE));
+      $logger->debug('Data sent to Freshdesk: ' . serialize($data));
+      $logger->debug('Response from Freshdesk: ' . $response);
     }
 
     // Hault processing if a 400 code was received
@@ -162,7 +170,7 @@ if ($result->rowCount() != 0) {
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
       $z++;
       $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
-      print_r(PHP_EOL . 'Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender . PHP_EOL);
+      $logger->info('Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender);
       // Set table field to indicate completed ticket.
       db_update('ticket')
         ->fields([
@@ -295,5 +303,5 @@ if ($i == 0) {
   $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
 }
 $logger->info($message);
-$logger->curl_close($connection);
+curl_close($connection);
 print_r($message);
