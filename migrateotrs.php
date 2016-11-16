@@ -10,11 +10,11 @@ require 'vendor/autoload.php';
 global $databases;
 // Require the configuration file.
 require_once(dirname(__FILE__) . '/includes/config.php');
-if (!empty($settings['logfilepath'])){
+if (!empty($settings['logfilepath'])) {
   try {
     $logger = new Katzgrau\KLogger\Logger($settings['logfilepath']);
   }
-  catch (Exception $e){
+  catch (Exception $e) {
     print_r('Error has occurred: ' . $e . "\n" . 'Exiting');
     exit;
   }
@@ -23,7 +23,7 @@ else {
   try {
     $logger = new Katzgrau\KLogger\Logger(__DIR__ . '/logs');
   }
-  catch (Exception $e){
+  catch (Exception $e) {
     print_r('Error has occurred: ' . $e . "\n" . 'Exiting');
     exit;
   }
@@ -138,6 +138,7 @@ if ($result->rowCount() != 0) {
       if (!empty($respondedecoded['description']) && $respondedecoded['description'] == 'Validation failed') {
         print_r("\n" . $response . "\n");
         print_r("\n" . $respondedecoded['description'] . "\n");
+        $logger->error('A field is invalid. Response: ' . $response);
         throw new Exception('A field is invalid');
       }
     }
@@ -147,11 +148,12 @@ if ($result->rowCount() != 0) {
 
     // Hault processing if a 400 code was received
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
-      print_r("\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n");
-      print_r("\n" . 'Data sent to Freshdesk' . "\n");
-      print_r($data);
-      print_r("\n" . 'Response from Freshdesk' . "\n");
-      print_r($response);
+      $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
+      $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
+      $errormessage .= $data;
+      $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
+      $errormessage .= $response;
+      $logger->error($errormessage);
       throw new Exception('Error Response received from Freshdesk. Check your information');
       exit;
     }
@@ -198,7 +200,9 @@ elseif ($result->rowCount() == 0) {
     }
     $articleresult = db_query('SELECT id, a_body, a_from, a_reply_to FROM {article} WHERE ticket_id = ' . $item->id . ' AND freshdesk_updated = 0  ORDER BY id');
     $articlecount = $articleresult->rowCount();
-    // DEBUGING echo 'Number of articles ' . $articlecount . PHP_EOL;
+    if ($debug == TRUE) {
+      $logger->debug('Number of articles ' . $articlecount);
+    }
     if ($articlecount == 0) {
       // No more articles mark the ticket as done.
       db_update('ticket')
@@ -211,8 +215,10 @@ elseif ($result->rowCount() == 0) {
     else {
       $j = 1;
       foreach ($articleresult as $notes) {
-        // DEBUGING echo 'API ITERATION i: ' . $i . ' of ' . $settings['chunksize'] . 'total' . PHP_EOL;
-        // DEBUGING echo 'ARTICLE ITERATION NUMBER ' . $j . PHP_EOL;
+        if ($debug == TRUE) {
+          $logger->debug('API ITERATION i: ' . $i . ' of ' . $settings['chunksize'] . 'total');
+          $logger->debug('ARTICLE ITERATION NUMBER ' . $j);
+        }
         if ($i >= $settings['chunksize']) {
           $message .= 'Process limit hit. Ran ' . $i . ' iterations processing articles.' . PHP_EOL;
           $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
@@ -237,7 +243,18 @@ elseif ($result->rowCount() == 0) {
 
           $response = curl_exec($connection);
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
+            $logger->error('You have hit your hourly API call limit.');
             die(PHP_EOL . 'You have hit your hourly API call limit. You processed ' . $i . ' articles. Run one hour from now.' . PHP_EOL);
+          }
+          // Hault processing if a 400 code was received
+          if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
+            $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
+            $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
+            $errormessage .= $data;
+            $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
+            $errormessage .= $response;
+            $logger->error($errormessage);
+            throw new Exception('Error Response received from Freshdesk. Check your information');
           }
           $respondedecoded = json_decode($response, TRUE);
         }
@@ -277,6 +294,6 @@ if ($i == 0) {
   $message .= 'No articles was processed. Process limit hit during base ticket processing. Continue running to process articles.' . PHP_EOL;
   $message .= 'Total process size was set to ' . $settings['chunksize'] . PHP_EOL;
 }
-
-curl_close($connection);
+$logger->info($message);
+$logger->curl_close($connection);
 print_r($message);
