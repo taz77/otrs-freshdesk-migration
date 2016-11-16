@@ -58,21 +58,10 @@ $spec1 = [
   'size' => 'normal',
   'default' => 0,
 ];
-// Create an Freshdesk ticket ID field.
-$spec2 = [
-  'description' => 'Freshdesk ID of ticket.',
-  'type' => 'int',
-  'size' => 'normal',
-  'default' => 0,
-];
 
 // Add fields to the tables needed.
 if (!db_field_exists('ticket', 'freshdesk_updated')) {
   db_add_field('ticket', 'freshdesk_updated', $spec1);
-}
-// Add fields to the tables needed.
-if (!db_field_exists('ticket', 'freshdesk_id')) {
-  db_add_field('ticket', 'freshdesk_id', $spec2);
 }
 // Add fields to the tables needed.
 if (!db_field_exists('ticket', 'freshdesk_updated_article')) {
