@@ -96,4 +96,4 @@ $settings = array(
   'logfilepath' => '',
 );
 
-
+$debug = FALSE;
