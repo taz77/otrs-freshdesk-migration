@@ -159,7 +159,7 @@ if ($result->rowCount() != 0) {
       die('Error Thrown ' . $e);
     }
     if ($debug == TRUE) {
-      $logger->debug('Ticker OTR ID Number: ' . $item->id);
+      $logger->debug('Ticker OTRS ID Number: ' . $item->id);
       $logger->debug('HTTP Response Code from base ticket call: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE));
       $logger->debug('Data sent to Freshdesk: ' . serialize($data));
       $logger->debug('Response from Freshdesk: ' . $response);
