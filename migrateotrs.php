@@ -10,7 +10,10 @@ require 'vendor/autoload.php';
 global $databases;
 // Require the configuration file.
 require_once(dirname(__FILE__) . '/includes/config.php');
+// Set default timezone.
 date_default_timezone_set('UTC');
+
+// Setup logging.
 if (!empty($settings['logfilepath'])) {
   try {
     $logger = new Katzgrau\KLogger\Logger($settings['logfilepath']);
@@ -29,6 +32,14 @@ else {
     exit;
   }
 }
+
+// Successful HTTP codes.
+$successcodes = [
+  200,
+  201,
+  202,
+  204,
+];
 
 // Load the functions file.
 require_once(dirname(__FILE__) . '/includes/functions.php');
@@ -167,7 +178,7 @@ if ($result->rowCount() != 0) {
     }
 
     // We only update if curl was successful.
-    if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
+    if (in_array(curl_getinfo($connection, CURLINFO_HTTP_CODE), $successcodes)) {
       $z++;
       $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
       $logger->info('Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender);
@@ -270,7 +281,7 @@ elseif ($result->rowCount() == 0) {
           die('Error Thrown ' . $e);
         }
         // We only update if curl was successful.
-        if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == 200) {
+        if (in_array(curl_getinfo($connection, CURLINFO_HTTP_CODE), $successcodes)) {
           // Set table field to indicate completed ticket.
           db_update('article')
             ->fields([
