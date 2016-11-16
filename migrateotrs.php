@@ -180,13 +180,11 @@ if ($result->rowCount() != 0) {
     // We only update if curl was successful.
     if (in_array(curl_getinfo($connection, CURLINFO_HTTP_CODE), $successcodes)) {
       $z++;
-      $ticketid = $respondedecoded['helpdesk_ticket']['display_id'];
-      $logger->info('Created Freshdesk Ticket ' . $ticketid . '. Sender ' . $sender);
+      $logger->info('Created Freshdesk Ticket from Sender ' . $sender);
       // Set table field to indicate completed ticket.
       db_update('ticket')
         ->fields([
           'freshdesk_updated' => 1,
-          'freshdesk_id' => $ticketid,
         ])
         ->condition('id', $item->id)
         ->execute();
