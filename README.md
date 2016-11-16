@@ -9,6 +9,7 @@ Convert OTRS tickets to Freshdesk tickets
 * MySQL or Postgre (does not support MSSQL)
 * PHP with PDO support and cURL library
 * PHP Command Line Interface (CLI)
+* Composer
 
 ### WARNING: ###
 This script modifies the OTRS database! Do not run this against your 
@@ -34,8 +35,9 @@ could very well take days to complete due to the API restriction.
 ##Usage:##
 
 1. Copy `./include/config.php.tpl` to `./include/config.php`
-2. Edit values in newly created `config.php` (refer to in code documentation).
-2. Run script: `php migrateotrs.php`
+2. Edit values in newly created `./include/config.php` (refer to in code documentation).
+3. Run `composer update` in the root directory of this code.
+4. Run script: `php migrateotrs.php`
 
 **NOTE**: You probably should turn off email notifications to your customers in Freshbooks to make sure no emails are sent.
 
