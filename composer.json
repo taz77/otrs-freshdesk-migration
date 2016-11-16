@@ -1,0 +1,22 @@
+{
+  "name": "fastglass/sendgrid",
+  "description": "Freshdesk Migration Script for OTRS",
+  "version": "1.0.7",
+  "homepage": "https://github.com/taz77/otrs-freshdesk-migration",
+  "license": "MIT",
+  "keywords": [
+    "Fresdesk",
+    "OTRS"
+  ],
+  "authors": [
+    {
+      "name": "Brady Owens",
+      "email": "brady@fastglass.net",
+      "homepage": "https://github.com/taz77"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "katzgrau/klogger": "dev-master"
+  }
+}
