@@ -184,7 +184,7 @@ if ($result->rowCount() != 0) {
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
       $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
       $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
-      $errormessage .= $data;
+      $errormessage .= serialize($data);
       $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
       $errormessage .= $response;
       $logger->error($errormessage);
@@ -311,7 +311,7 @@ elseif ($result->rowCount() == 0) {
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
             $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
             $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
-            $errormessage .= $data;
+            $errormessage .= serialize($data);
             $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
             $errormessage .= $response;
             $logger->error($errormessage);
