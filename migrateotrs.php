@@ -151,11 +151,26 @@ if ($result->rowCount() != 0) {
       if (!empty($respondedecoded['description']) && $respondedecoded['description'] == 'Validation failed') {
         print_r("\n" . $response . "\n");
         print_r("\n" . $respondedecoded['description'] . "\n");
-        $logger->error('A field is invalid. Response: ' . $response);
-        throw new Exception('A field is invalid');
+        $logger->error('A field is invalid for OTRS ticket number ' . $item->id . '. Response: ' . $response);
+        // Mark the item as bad (-1) and allow processing to continue.
+        db_update('ticket')
+          ->fields([
+            'freshdesk_updated' => -1,
+            'freshdesk_id' => -1,
+          ])
+          ->condition('id', $item->id)
+          ->execute();
+        // Must also mark the first article as done so we don't make dupes later.
+        db_update('article')
+          ->fields([
+            'freshdesk_updated' => -1,
+          ])
+          ->condition('id', $record['id'])
+          ->execute();
       }
     }
     catch (Exception $e) {
+      $logger->error('Exception thrown: ' . $e);
       die('Error Thrown ' . $e);
     }
     if ($debug == TRUE) {
@@ -260,11 +275,38 @@ elseif ($result->rowCount() == 0) {
           curl_setopt($connection, CURLOPT_POST, TRUE);
           curl_setopt($connection, CURLOPT_POSTFIELDS, $json_body);
 
-          $response = curl_exec($connection);
-          if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
-            $logger->error('You have hit your hourly API call limit.');
-            die(PHP_EOL . 'You have hit your hourly API call limit. You processed ' . $i . ' articles. Run one hour from now.' . PHP_EOL);
+          try {
+            $response = curl_exec($connection);
+            if (curl_getinfo($connection, CURLINFO_HTTP_CODE) == '403') {
+              $logger->error('You have hit your hourly API call limit.');
+              die(PHP_EOL . 'You have hit your hourly API call limit. You processed ' . $i . ' articles. Run one hour from now.' . PHP_EOL);
+            }
+            if (!empty($respondedecoded['description']) && $respondedecoded['description'] == 'Validation failed') {
+              print_r("\n" . $response . "\n");
+              print_r("\n" . $respondedecoded['description'] . "\n");
+              $logger->error('A field is invalid. Response: ' . $response);
+              $logger->error('A field is invalid for OTRS ticket number ' . $item->id . '. Response: ' . $response);
+              db_update('ticket')
+                ->fields([
+                  'freshdesk_updated' => -1,
+                  'freshdesk_id' => -1,
+                ])
+                ->condition('id', $item->id)
+                ->execute();
+              // Must also mark the first article as done so we don't make dupes later.
+              db_update('article')
+                ->fields([
+                  'freshdesk_updated' => -1,
+                ])
+                ->condition('id', $notes->id)
+                ->execute();
+            }
           }
+          catch (Exception $e) {
+            $logger->error('Exception thrown: ' . $e);
+            die('Error Thrown ' . $e);
+          }
+
           // Hault processing if a 400 code was received
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
             $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
