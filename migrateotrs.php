@@ -189,7 +189,6 @@ if ($result->rowCount() != 0) {
       $errormessage .= $response;
       $logger->error($errormessage);
       throw new Exception('Error Response received from Freshdesk. Check your information');
-      exit;
     }
 
     // We only update if curl was successful.
