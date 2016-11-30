@@ -310,10 +310,14 @@ elseif ($result->rowCount() == 0) {
 
           // Hault processing if a 400 code was received
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
-            $errormessage = "\n" . 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
-            $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
+            $errormessage = "\n" . '============================================================================' . "\n";
+            $errormessage .= 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
+            $errormessage .= 'Data sent to Freshdesk' . "\n";
             $errormessage .= serialize($data);
+            $errormessage .= "\n" . 'Freshdesk Ticket being processed: ' . $item->freshdesk_id;
+            $errormessage .= "\n" . 'OTRS Article ID Number: ' . $notes->id;
             $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
+            $errormessage .= '============================================================================' . "\n";
             $errormessage .= $response;
             $logger->error($errormessage);
             throw new Exception('Error Response received from Freshdesk. Check your information');
