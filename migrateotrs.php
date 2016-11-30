@@ -221,7 +221,7 @@ if ($result->rowCount() != 0) {
 // Process replies to tickets stored in the ariticles table.
 elseif ($result->rowCount() == 0) {
   // Process ticket replies and notes.
-  $query = 'SELECT id, freshdesk_id FROM {ticket} WHERE freshdesk_updated_article = 0 AND freshdesk_id !=0 ORDER by id';
+  $query = 'SELECT id, freshdesk_id FROM {ticket} WHERE freshdesk_updated_article = 0 AND (freshdesk_id !=0 AND freshdesk_id !=-1) ORDER by id';
   $ticketresult = db_query($query);
   if ($ticketresult->rowCount() == 0) {
     die('Processing is over out of base tickets to process' . PHP_EOL);
