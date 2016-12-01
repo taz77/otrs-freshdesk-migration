@@ -184,8 +184,10 @@ if ($result->rowCount() != 0) {
     if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
       $errormessage = "\n" . '============================================================================' . "\n";
       $errormessage .= 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
+      $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
       $errormessage .= "\n" . 'Data sent to Freshdesk' . "\n";
       $errormessage .= serialize($data);
+      $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
       $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
       $errormessage .= $response;
       $errormessage .= "\n" . '============================================================================' . "\n" . "\n";
@@ -314,10 +316,14 @@ elseif ($result->rowCount() == 0) {
           if (curl_getinfo($connection, CURLINFO_HTTP_CODE) >= 400 && curl_getinfo($connection, CURLINFO_HTTP_CODE) <= 500) {
             $errormessage = "\n" . '============================================================================' . "\n";
             $errormessage .= 'Error code received: ' . curl_getinfo($connection, CURLINFO_HTTP_CODE) . "\n";
+            $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
             $errormessage .= 'Data sent to Freshdesk' . "\n";
             $errormessage .= serialize($data);
+            $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
             $errormessage .= "\n" . 'Freshdesk Ticket being processed: ' . $item->freshdesk_id;
+            $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
             $errormessage .= "\n" . 'OTRS Article ID Number: ' . $notes->id;
+            $errormessage = "\n" . '----------------------------------------------------------------------------' . "\n";
             $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
             $errormessage .= $response;
             $errormessage .= '============================================================================' . "\n" . "\n";
