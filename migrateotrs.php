@@ -326,7 +326,7 @@ elseif ($result->rowCount() == 0) {
             $errormessage .= "\n" . '----------------------------------------------------------------------------' . "\n";
             $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
             $errormessage .= $response;
-            $errormessage .= '============================================================================' . "\n" . "\n";
+            $errormessage .= "\n" . '============================================================================' . "\n" . "\n";
             $logger->error($errormessage);
             throw new Exception('Error Response received from Freshdesk. Check your information');
           }
