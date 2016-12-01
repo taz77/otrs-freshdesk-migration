@@ -188,7 +188,7 @@ if ($result->rowCount() != 0) {
       $errormessage .= serialize($data);
       $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
       $errormessage .= $response;
-      $errormessage .= "\n" . '============================================================================' . "\n";
+      $errormessage .= "\n" . '============================================================================' . "\n" . "\n";
       $logger->error($errormessage);
       throw new Exception('Error Response received from Freshdesk. Check your information');
     }
@@ -319,8 +319,8 @@ elseif ($result->rowCount() == 0) {
             $errormessage .= "\n" . 'Freshdesk Ticket being processed: ' . $item->freshdesk_id;
             $errormessage .= "\n" . 'OTRS Article ID Number: ' . $notes->id;
             $errormessage .= "\n" . 'Response from Freshdesk' . "\n";
-            $errormessage .= '============================================================================' . "\n";
             $errormessage .= $response;
+            $errormessage .= '============================================================================' . "\n" . "\n";
             $logger->error($errormessage);
             throw new Exception('Error Response received from Freshdesk. Check your information');
           }
